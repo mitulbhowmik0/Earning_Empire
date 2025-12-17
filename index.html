@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:linear-gradient(180deg,#6d5dfc,#7b6df6);min-height:100vh}
+.app{max-width:420px;margin:auto;padding-bottom:90px}
+
+/* Header */
+.header{
+  padding:22px 16px;
+  text-align:center;
+  color:#fff;
+  font-size:22px;
+  font-weight:700;
+}
+
+/* Card */
+.card{
+  background:#fff;
+  border-radius:20px;
+  margin:14px;
+  padding:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+.card-title{text-align:center;color:#6b7280;font-size:14px}
+.balance{text-align:center;font-size:48px;font-weight:800;color:#f59e0b}
+.balance-sub{text-align:center;color:#9ca3af;font-size:14px}
+
+.section-title{
+  font-size:18px;
+  font-weight:700;
+  color:#4f46e5;
+  margin-bottom:10px;
+}
+.info{
+  background:#f3f4f6;
+  padding:14px;
+  border-radius:14px;
+  font-size:14px;
+  color:#4b5563;
+}
+
+/* Buttons */
+.btn{
+  width:100%;
+  padding:16px;
+  margin-top:14px;
+  border-radius:999px;
+  font-size:16px;
+  font-weight:700;
+  border:none;
+  transition:.2s;
+}
+.btn-primary{
+  background:linear-gradient(135deg,#7c6cff,#5a4bff);
+  color:#fff;
+}
+.btn-outline{
+  background:#fff;
+  border:2px solid #7c6cff;
+  color:#5a4bff;
+}
+.btn:disabled{opacity:.5}
+.btn:active{transform:scale(.96)}
+
+/* Pages */
+.page{display:none}
+.page.active{display:block}
+
+/* Bottom Nav */
+.nav{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  background:#fff;
+  display:flex;
+  border-top:1px solid #e5e7eb;
+}
+.nav button{
+  flex:1;
+  padding:10px 0;
+  border:none;
+  background:none;
+  font-size:12px;
+  color:#9ca3af;
+}
+.nav button.active{color:#5a4bff;font-weight:700}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<div class="header">Dashboard</div>
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <div class="card">
+    <div class="card-title">Current Balance</div>
+    <div class="balance" id="coins">0</div>
+    <div class="balance-sub">tokens</div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Quick Actions</div>
+    <div class="info">Daily actions are available once per day.</div>
+
+    <button id="spinBtn" class="btn btn-primary" onclick="spin()">Spin & Earn</button>
+    <button id="dailyBtn" class="btn btn-primary" onclick="daily()">Daily Reward</button>
+    <button id="adBtn" class="btn btn-outline" onclick="watchAd()">Watch Ad & Earn</button>
+  </div>
+</div>
+
+<!-- SPIN -->
+<div id="spin" class="page">
+  <div class="card">
+    <div class="section-title">Spin</div>
+    <p>Spin is available once per day.</p>
+  </div>
+</div>
+
+<!-- WALLET -->
+<div id="wallet" class="page">
+  <div class="card">
+    <div class="section-title">Wallet</div>
+    <p>Your balance is updated automatically.</p>
+  </div>
+</div>
+
+<!-- REWARDS -->
+<div id="rewards" class="page">
+  <div class="card">
+    <div class="section-title">Rewards</div>
+    <p>Daily rewards and bonus codes will appear here.</p>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leader" class="page">
+  <div class="card">
+    <div class="section-title">Leaderboard</div>
+    <p>#1 User – 1200</p>
+    <p>#2 User – 980</p>
+    <p>#3 User – 760</p>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="page">
+  <div class="card">
+    <div class="section-title">Profile</div>
+    <p>User: Telegram User</p>
+    <p>Referral Code: ABC123</p>
+  </div>
+</div>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="active" onclick="nav('home',this)">Home</button>
+  <button onclick="nav('spin',this)">Spin</button>
+  <button onclick="nav('wallet',this)">Wallet</button>
+  <button onclick="nav('rewards',this)">Rewards</button>
+  <button onclick="nav('leader',this)">Leader</button>
+  <button onclick="nav('profile',this)">Profile</button>
+</div>
+
+<script>
+let coins = Number(localStorage.getItem("coins")||0);
+const today = new Date().toDateString();
+document.getElementById("coins").innerText = coins;
+
+function save(){
+  localStorage.setItem("coins",coins);
+  document.getElementById("coins").innerText = coins;
+}
+
+function locked(key,btn){
+  if(localStorage.getItem(key)===today){
+    btn.disabled=true;
+    return true;
+  }
+  return false;
+}
+
+function spin(){
+  if(locked("spin",spinBtn))return;
+  coins+=Math.floor(Math.random()*10)+5;
+  localStorage.setItem("spin",today);
+  save();
+  spinBtn.disabled=true;
+}
+
+function daily(){
+  if(locked("daily",dailyBtn))return;
+  coins+=20;
+  localStorage.setItem("daily",today);
+  save();
+  dailyBtn.disabled=true;
+}
+
+function watchAd(){
+  if(locked("ad",adBtn))return;
+  coins+=10;
+  localStorage.setItem("ad",today);
+  save();
+  adBtn.disabled=true;
+}
+
+locked("spin",spinBtn);
+locked("daily",dailyBtn);
+locked("ad",adBtn);
+
+function nav(id,btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+}
+</script>
+
+</body>
+</html>
