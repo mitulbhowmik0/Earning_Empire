@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard</title>
+<title>Earning App</title>
 
+<!-- Telegram Mini App -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -97,69 +101,68 @@ body{background:linear-gradient(180deg,#6d5dfc,#7b6df6);min-height:100vh}
 <body>
 
 <div class="app">
-<div class="header">Dashboard</div>
+  <div class="header">Dashboard</div>
 
-<!-- HOME -->
-<div id="home" class="page active">
-  <div class="card">
-    <div class="card-title">Current Balance</div>
-    <div class="balance" id="coins">0</div>
-    <div class="balance-sub">tokens</div>
-  </div>
-
-  <div class="card">
-    <div class="section-title">Quick Actions</div>
-    <div class="info">
-      Daily reward once per day.<br>
-      Spin requires ads and is limited to 500 per day.
+  <!-- HOME -->
+  <div id="home" class="page active">
+    <div class="card">
+      <div class="card-title">Current Balance</div>
+      <div class="balance" id="coins">0</div>
+      <div class="balance-sub">tokens</div>
     </div>
 
-    <button class="btn btn-primary" onclick="dailyReward()">Daily Reward</button>
-    <button class="btn btn-primary" onclick="spin()">Spin & Earn</button>
-    <button class="btn btn-outline" onclick="watchAd()">Watch Ads & Earn</button>
-  </div>
-</div>
+    <div class="card">
+      <div class="section-title">Quick Actions</div>
+      <div class="info">
+        Daily reward once per day.<br>
+        Spin requires ads and is limited to 500 per day.
+      </div>
 
-<!-- SPIN -->
-<div id="spin" class="page">
-  <div class="card">
-    <div class="section-title">Spin</div>
-    <p>Each spin requires watching an ad. Max 500 spins per day.</p>
+      <button class="btn btn-primary" onclick="dailyReward()">Daily Reward</button>
+      <button class="btn btn-primary" onclick="spin()">Spin & Earn</button>
+      <button class="btn btn-outline" onclick="watchAd()">Watch Ads & Earn</button>
+    </div>
   </div>
-</div>
 
-<!-- WALLET -->
-<div id="wallet" class="page">
-  <div class="card">
-    <div class="section-title">Wallet</div>
-    <p>Your coins are stored securely.</p>
+  <!-- SPIN -->
+  <div id="spin" class="page">
+    <div class="card">
+      <div class="section-title">Spin</div>
+      <p>Each spin gives coins. Max 500 spins per day.</p>
+    </div>
   </div>
-</div>
 
-<!-- REWARDS -->
-<div id="rewards" class="page">
-  <div class="card">
-    <div class="section-title">Rewards</div>
-    <p>Events and bonus rewards will appear here.</p>
+  <!-- WALLET -->
+  <div id="wallet" class="page">
+    <div class="card">
+      <div class="section-title">Wallet</div>
+      <p>Your coins are stored securely in the server.</p>
+    </div>
   </div>
-</div>
 
-<!-- LEADER -->
-<div id="leader" class="page">
-  <div class="card">
-    <div class="section-title">Leaderboard</div>
-    <p>Top users will be shown here.</p>
+  <!-- REWARDS -->
+  <div id="rewards" class="page">
+    <div class="card">
+      <div class="section-title">Rewards</div>
+      <p>Events and bonus rewards will appear here.</p>
+    </div>
   </div>
-</div>
 
-<!-- PROFILE -->
-<div id="profile" class="page">
-  <div class="card">
-    <div class="section-title">Profile</div>
-    <p id="profileUser">User</p>
+  <!-- LEADER -->
+  <div id="leader" class="page">
+    <div class="card">
+      <div class="section-title">Leaderboard</div>
+      <p>Top users coming soon.</p>
+    </div>
   </div>
-</div>
 
+  <!-- PROFILE -->
+  <div id="profile" class="page">
+    <div class="card">
+      <div class="section-title">Profile</div>
+      <p id="profileUser">User</p>
+    </div>
+  </div>
 </div>
 
 <!-- NAV -->
@@ -175,17 +178,26 @@ body{background:linear-gradient(180deg,#6d5dfc,#7b6df6);min-height:100vh}
 <script>
 /* ================= SUPABASE CONFIG ================= */
 const SUPABASE_URL = "https://cbcxteuujmcourighryc.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiY3h0ZXV1am1jb3VyaWdocnljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDc0NzIsImV4cCI6MjA4MTM4MzQ3Mn0.iHYKilUnnudmdiVSETD7geyIFo2G5tcGF_PYPnxV7js";
-const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiY3h0ZXV1am1jb3VyaWdocnljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDc0NzIsImV4cCI6MjA4MTM4MzQ3Mn0.iHYKilUnnudmdiVSETD7geyIFo2G5tcGF_PYPnxV7js";
+const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ================= TEMP USER ================= */
-const telegram_id = 999999999;
-const username = "demo_user";
+/* ================= TELEGRAM USER ================= */
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
 
+const telegram_id = tg.initDataUnsafe?.user?.id;
+const username = tg.initDataUnsafe?.user?.username || "telegram_user";
+
+if (!telegram_id) {
+  alert("Please open this app from Telegram");
+}
+
+/* ================= GLOBAL ================= */
 const today = new Date().toISOString().slice(0,10);
 let userData = null;
 
-/* ================= INIT ================= */
+/* ================= INIT USER ================= */
 async function initUser(){
   const { data } = await supabase
     .from("user")
@@ -194,29 +206,34 @@ async function initUser(){
     .single();
 
   if(!data){
-    const { data:newUser } = await supabase.from("user").insert({
-      telegram_id,
-      username,
+    await supabase.from("user").insert({
+      telegram_id: telegram_id,
+      username: username,
       total_coins: 0,
       total_ads: 0,
       spin_count_today: 0,
-      spin_date: today
-    }).select().single();
-    userData = newUser;
-  }else{
-    userData = data;
-    if(userData.spin_date !== today){
-      await supabase.from("user").update({
-        spin_date: today,
-        spin_count_today: 0
-      }).eq("telegram_id", telegram_id);
-      userData.spin_date = today;
-      userData.spin_count_today = 0;
-    }
+      spin_date: today,
+      last_daily: null
+    });
+    return initUser();
   }
+
+  userData = data;
+
+  if(userData.spin_date !== today){
+    await supabase.from("user").update({
+      spin_date: today,
+      spin_count_today: 0
+    }).eq("telegram_id", telegram_id);
+
+    userData.spin_date = today;
+    userData.spin_count_today = 0;
+  }
+
   updateUI();
 }
 
+/* ================= UI ================= */
 function updateUI(){
   document.getElementById("coins").innerText = userData.total_coins;
   document.getElementById("profileUser").innerText = username;
@@ -225,9 +242,10 @@ function updateUI(){
 /* ================= DAILY REWARD ================= */
 async function dailyReward(){
   if(userData.last_daily === today){
-    alert("Already claimed today");
+    alert("Daily reward already claimed");
     return;
   }
+
   userData.total_coins += 20;
   userData.last_daily = today;
 
@@ -239,7 +257,7 @@ async function dailyReward(){
   updateUI();
 }
 
-/* ================= WATCH ADS ================= */
+/* ================= WATCH ADS (UNLIMITED) ================= */
 async function watchAd(){
   userData.total_coins += 5;
   userData.total_ads += 1;
@@ -252,13 +270,14 @@ async function watchAd(){
   updateUI();
 }
 
-/* ================= SPIN ================= */
+/* ================= SPIN (MAX 500) ================= */
 async function spin(){
   if(userData.spin_count_today >= 500){
     alert("Daily spin limit reached");
     return;
   }
-  const reward = Math.floor(Math.random()*10)+5;
+
+  const reward = Math.floor(Math.random()*10) + 5;
   userData.spin_count_today += 1;
   userData.total_coins += reward;
 
@@ -278,6 +297,7 @@ function navPage(id,btn){
   btn.classList.add("active");
 }
 
+/* ================= START ================= */
 initUser();
 </script>
 
