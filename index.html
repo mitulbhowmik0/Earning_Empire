@@ -12,6 +12,7 @@
 body{background:linear-gradient(180deg,#6d5dfc,#7b6df6);min-height:100vh}
 .app{max-width:420px;margin:auto;padding-bottom:90px}
 
+/* Header */
 .header{
   padding:22px 16px;
   text-align:center;
@@ -19,6 +20,8 @@ body{background:linear-gradient(180deg,#6d5dfc,#7b6df6);min-height:100vh}
   font-size:22px;
   font-weight:700;
 }
+
+/* Card */
 .card{
   background:#fff;
   border-radius:20px;
@@ -43,6 +46,8 @@ body{background:linear-gradient(180deg,#6d5dfc,#7b6df6);min-height:100vh}
   font-size:14px;
   color:#4b5563;
 }
+
+/* Buttons */
 .btn{
   width:100%;
   padding:16px;
@@ -64,14 +69,38 @@ body{background:linear-gradient(180deg,#6d5dfc,#7b6df6);min-height:100vh}
 }
 .btn:disabled{opacity:.5}
 .btn:active{transform:scale(.96)}
+
+/* Pages */
+.page{display:none}
+.page.active{display:block}
+
+/* Bottom Nav */
+.nav{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  background:#fff;
+  display:flex;
+  border-top:1px solid #e5e7eb;
+}
+.nav button{
+  flex:1;
+  padding:10px 0;
+  border:none;
+  background:none;
+  font-size:12px;
+  color:#9ca3af;
+}
+.nav button.active{color:#5a4bff;font-weight:700}
 </style>
 </head>
 
 <body>
 
 <div class="app">
-  <div class="header">Dashboard</div>
+<div class="header">Dashboard</div>
 
+<!-- HOME -->
+<div id="home" class="page active">
   <div class="card">
     <div class="card-title">Current Balance</div>
     <div class="balance" id="coins">0</div>
@@ -81,7 +110,7 @@ body{background:linear-gradient(180deg,#6d5dfc,#7b6df6);min-height:100vh}
   <div class="card">
     <div class="section-title">Quick Actions</div>
     <div class="info">
-      Daily reward once per day.  
+      Daily reward once per day.<br>
       Spin requires ads and is limited to 500 per day.
     </div>
 
@@ -91,20 +120,72 @@ body{background:linear-gradient(180deg,#6d5dfc,#7b6df6);min-height:100vh}
   </div>
 </div>
 
+<!-- SPIN -->
+<div id="spin" class="page">
+  <div class="card">
+    <div class="section-title">Spin</div>
+    <p>Each spin requires watching an ad. Max 500 spins per day.</p>
+  </div>
+</div>
+
+<!-- WALLET -->
+<div id="wallet" class="page">
+  <div class="card">
+    <div class="section-title">Wallet</div>
+    <p>Your coins are stored securely.</p>
+  </div>
+</div>
+
+<!-- REWARDS -->
+<div id="rewards" class="page">
+  <div class="card">
+    <div class="section-title">Rewards</div>
+    <p>Events and bonus rewards will appear here.</p>
+  </div>
+</div>
+
+<!-- LEADER -->
+<div id="leader" class="page">
+  <div class="card">
+    <div class="section-title">Leaderboard</div>
+    <p>Top users will be shown here.</p>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="page">
+  <div class="card">
+    <div class="section-title">Profile</div>
+    <p id="profileUser">User</p>
+  </div>
+</div>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="active" onclick="navPage('home',this)">Home</button>
+  <button onclick="navPage('spin',this)">Spin</button>
+  <button onclick="navPage('wallet',this)">Wallet</button>
+  <button onclick="navPage('rewards',this)">Rewards</button>
+  <button onclick="navPage('leader',this)">Leader</button>
+  <button onclick="navPage('profile',this)">Profile</button>
+</div>
+
 <script>
 /* ================= SUPABASE CONFIG ================= */
 const SUPABASE_URL = "https://cbcxteuujmcourighryc.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiY3h0ZXV1am1jb3VyaWdocnljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDc0NzIsImV4cCI6MjA4MTM4MzQ3Mn0.iHYKilUnnudmdiVSETD7geyIFo2G5tcGF_PYPnxV7js";
 const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ================= TEMP USER (REPLACE LATER) ================= */
-const telegram_id = 999999999;   // later real Telegram ID
+/* ================= TEMP USER ================= */
+const telegram_id = 999999999;
 const username = "demo_user";
 
-/* ================= INIT ================= */
 const today = new Date().toISOString().slice(0,10);
 let userData = null;
 
+/* ================= INIT ================= */
 async function initUser(){
   const { data } = await supabase
     .from("user")
@@ -138,15 +219,15 @@ async function initUser(){
 
 function updateUI(){
   document.getElementById("coins").innerText = userData.total_coins;
+  document.getElementById("profileUser").innerText = username;
 }
 
 /* ================= DAILY REWARD ================= */
 async function dailyReward(){
   if(userData.last_daily === today){
-    alert("Daily reward already claimed");
+    alert("Already claimed today");
     return;
   }
-
   userData.total_coins += 20;
   userData.last_daily = today;
 
@@ -156,10 +237,9 @@ async function dailyReward(){
   }).eq("telegram_id", telegram_id);
 
   updateUI();
-  alert("Daily reward added");
 }
 
-/* ================= WATCH ADS (UNLIMITED) ================= */
+/* ================= WATCH ADS ================= */
 async function watchAd(){
   userData.total_coins += 5;
   userData.total_ads += 1;
@@ -169,24 +249,16 @@ async function watchAd(){
     total_ads: userData.total_ads
   }).eq("telegram_id", telegram_id);
 
-  await supabase.from("ad_logs").insert({
-    telegram_id,
-    type: "watch",
-    reward: 5
-  });
-
   updateUI();
 }
 
-/* ================= SPIN (MAX 500 / DAY) ================= */
+/* ================= SPIN ================= */
 async function spin(){
   if(userData.spin_count_today >= 500){
     alert("Daily spin limit reached");
     return;
   }
-
-  const reward = Math.floor(Math.random()*10) + 5;
-
+  const reward = Math.floor(Math.random()*10)+5;
   userData.spin_count_today += 1;
   userData.total_coins += reward;
 
@@ -195,13 +267,15 @@ async function spin(){
     total_coins: userData.total_coins
   }).eq("telegram_id", telegram_id);
 
-  await supabase.from("ad_logs").insert({
-    telegram_id,
-    type: "spin",
-    reward
-  });
-
   updateUI();
+}
+
+/* ================= NAV ================= */
+function navPage(id,btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
 }
 
 initUser();
